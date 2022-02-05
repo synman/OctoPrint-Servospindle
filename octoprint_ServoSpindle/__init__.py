@@ -20,9 +20,13 @@ class ServospindlePlugin(
     def __init__(self):
         self.servo_initial_value = None
         self.servo_min_pulse_width = None
+        self.servo_max_pulse_width = None
+        self.servo_frame_width = None
         self.servo_gpio_pin = None
+
         self.pigpio_host = None
         self.pigpio_port = None
+
         self.minimum_speed = None
         self.maximum_speed = None
 
@@ -35,13 +39,15 @@ class ServospindlePlugin(
     def get_settings_defaults(self):
         self._logger.debug("__init__: get_settings_defaults")
         return dict(
-            servo_initial_value=-1,
-            servo_min_pulse_width=0.001128,
-            servo_gpio_pin=26,
-            pigpio_host="octopi-zero2",
-            pigpio_port=32000,
-            minimum_speed=0,
-            maximum_speed=10000,
+            servo_initial_value = -1,
+            servo_min_pulse_width = 0.001128,
+            servo_max_pulse_width = 0.002,
+            servo_frame_width = .02,
+            servo_gpio_pin = 26,
+            pigpio_host = "octopi-zero2",
+            pigpio_port = 32000,
+            minimum_speed = 0,
+            maximum_speed = 10000,
         )
 
     ##-- StartupPlugin mix-in
@@ -50,6 +56,8 @@ class ServospindlePlugin(
 
         self.servo_initial_value = self._settings.get(["servo_initial_value"])
         self.servo_min_pulse_width = self._settings.get(["servo_min_pulse_width"])
+        self.servo_max_pulse_width = self._settings.get(["servo_max_pulse_width"])
+        self.servo_frame_width = self._settings.get(["servo_frame_width"])
         self.servo_gpio_pin = self._settings.get(["servo_gpio_pin"])
 
         self.pigpio_host = self._settings.get(["pigpio_host"])
@@ -61,35 +69,45 @@ class ServospindlePlugin(
         self.servoValue = self.servo_initial_value
 
         factory = PiGPIOFactory(host=self.pigpio_host, port=self.pigpio_port)
+
         self.servo = Servo(
-            self.servo_gpio_pin,
-            pin_factory=factory,
-            initial_value=self.servo_initial_value,
-            min_pulse_width=self.servo_min_pulse_width,
-        )
+                           self.servo_gpio_pin,
+                           pin_factory=factory,
+                           initial_value=self.servo_initial_value,
+                           min_pulse_width=self.servo_min_pulse_width,
+                           max_pulse_width=self.servo_max_pulse_width,
+                           frame_width=self.servo_frame_width
+                          )
+
 
     ##-- gcode sending hook
-    def hook_gcode_sending(
-        self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs
-    ):
-        self._logger.debug(
-            "__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(
-                phase, cmd, cmd_type, gcode
-            )
-        )
-        command = cmd.upper().strip()
+    def hook_gcode_sending(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
+        self._logger.debug("__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(phase, cmd, cmd_type, gcode))
+        self.process_gcode_data(cmd)
+        
 
-        if "M5" in command:
+    ##-- gcode received hook
+    def hook_gcode_received(self, comm_instance, line, *args, **kwargs):
+        self._logger.debug("__init__: hook_gcode_received line=[{}]".format(line.replace("\r", "<cr>").replace("\n", "<lf>")))
+        self.process_gcode_data(line)
+
+
+    def process_gcode_data(self, gcode):
+        data = gcode.upper().strip()
+
+        if "M5" in data and not self.M5Active:
             self._logger.debug("setting servo to minimum (M5)")
             self.M5Active = True
             self.servo.min()
 
-        if "M3" in command:
+        if "M3" in data and self.M5Active:
             self._logger.debug("unlocking servo (M3)")
-            self.servo.value = self.servoValue
+            if not self.servo.value == self.servoValue:
+                self._logger.debug("setting servo to [{}]".format(servoValue))
+                self.servo.value = self.servoValue
             self.M5Active = False
 
-        match = re.search(r".*[S]\ *(-?[\d.]+).*", command)
+        match = re.search(r".*[S]\ *(-?[\d.]+).*", data)
         if not match is None:
             speed = float(match.groups(1)[0])
             speedRange = self.maximum_speed - self.minimum_speed
@@ -99,11 +117,14 @@ class ServospindlePlugin(
             servoValue = -1 if servoValue < -1 else servoValue
             servoValue = 1 if servoValue > 1 else servoValue
 
-            self.servoValue = servoValue
+            if not self.servoValue == servoValue:
+                self._logger.debug("setting servo reference to [{}]".format(servoValue))
+                self.servoValue = servoValue
 
-            if not self.M5Active:
-                self._logger.debug("setting servo to [{}]".format(servoValue))
-                self.servo.value = self.servoValue
+                if not self.M5Active:
+                    self._logger.debug("setting servo to [{}]".format(servoValue))
+                    self.servo.value = self.servoValue
+
 
     ##-- EventHandlerPlugin mix-in
     def on_event(self, event, payload):
@@ -114,6 +135,7 @@ class ServospindlePlugin(
         if event == Events.SHUTDOWN:
             self._logger.debug("shutting down")
             self.servo.value = self.servo_initial_value
+
 
     ##~~ AssetPlugin mixin
     def get_assets(self):
@@ -126,6 +148,7 @@ class ServospindlePlugin(
             "css": ["css/ServoSpindle.css"],
             "less": ["less/ServoSpindle.less"],
         }
+
 
     ##~~ Softwareupdate hook
     def get_update_information(self):
@@ -169,5 +192,6 @@ def __plugin_load__():
     global __plugin_hooks__
     __plugin_hooks__ = {
         "octoprint.comm.protocol.gcode.sending": __plugin_implementation__.hook_gcode_sending,
+        'octoprint.comm.protocol.gcode.received': __plugin_implementation__.hook_gcode_received,
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
     }
