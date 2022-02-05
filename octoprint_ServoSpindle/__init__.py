@@ -51,8 +51,8 @@ class ServospindlePlugin(
         )
 
     ##-- StartupPlugin mix-in
-    def on_after_startup(self):
-        self._logger.debug("__init__: on_after_startup")
+    def on_startup(self, host, port):
+        self._logger.debug("__init__: on_startup host=[{}] port=[{}]".format(host, port)))
 
         self.servo_initial_value = self._settings.get(["servo_initial_value"])
         self.servo_min_pulse_width = self._settings.get(["servo_min_pulse_width"])
