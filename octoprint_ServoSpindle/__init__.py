@@ -41,6 +41,7 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
              maximum_speed = 10000
          }
 
+
      # #-- StartupPlugin mix-in
      def on_after_startup(self):
          self._logger.debug("__init__: on_after_startup")
@@ -91,9 +92,10 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
 
             self.servoValue = servoValue
 
-            if !self.M5Active:
+            if not self.M5Active:
                 self._logger.debug("setting servo to [{}]".format(servoValue))
-                self.servo.value = servoValue
+                self.servo.value = self.servoValue
+
 
     # #-- EventHandlerPlugin mix-in
     def on_event(self, event, payload):
@@ -115,6 +117,7 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
             "css": ["css/ServoSpindle.css"],
             "less": ["less/ServoSpindle.less"]
         }
+
 
     ##~~ Softwareupdate hook
     def get_update_information(self):
