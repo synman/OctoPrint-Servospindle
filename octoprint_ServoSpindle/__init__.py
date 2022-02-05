@@ -129,10 +129,7 @@ class ServospindlePlugin(
 
     ##-- EventHandlerPlugin mix-in
     def on_event(self, event, payload):
-        self._logger.debug(
-            "__init__: on_event event=[{}] payload=[{}]".format(event, payload)
-        )
-
+        # self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
         if event == Events.SHUTDOWN:
             self._logger.debug("shutting down")
             self.servo.value = self.servo_initial_value
