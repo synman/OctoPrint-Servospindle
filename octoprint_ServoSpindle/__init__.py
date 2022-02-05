@@ -31,7 +31,7 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
      ##~~ SettingsPlugin mixin
      def get_settings_defaults(self):
          self._logger.debug("__init__: get_settings_defaults")
-         return {
+         return dict(
              servo_initial_value = -1,
              servo_min_pulse_width = 0.001128,
              servo_gpio_pin = 26,
@@ -39,7 +39,7 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
              pigpio_port = 32000,
              minimum_speed = 0,
              maximum_speed = 10000
-         }
+         )
 
 
      # #-- StartupPlugin mix-in
