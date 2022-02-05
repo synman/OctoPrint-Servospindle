@@ -1,14 +1,6 @@
 # coding=utf-8
 from __future__ import absolute_import
 
-### (Don't forget to remove me)
-# This is a basic skeleton for your plugin's __init__.py. You probably want to adjust the class name of your plugin
-# as well as the plugin mixins it's subclassing from. This is really just a basic skeleton to get you started,
-# defining your plugin as a template plugin, settings and asset plugin. Feel free to add or remove mixins
-# as necessary.
-#
-# Take a look at the documentation on what other plugin mixins are available.
-
 import octoprint.plugin
 import re
 
@@ -18,6 +10,7 @@ from gpiozero import Servo
 class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
                          octoprint.plugin.AssetPlugin,
                          octoprint.plugin.StartupPlugin,
+                         octoprint.plugin.EventHandlerPlugin,
                          octoprint.plugin.TemplatePlugin):
 
      def __init__(self):
@@ -34,9 +27,10 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
 
          self.servo = None
 
-     ##~~ SettingsPlugin mixin
 
+     ##~~ SettingsPlugin mixin
      def get_settings_defaults(self):
+         self._logger.debug("__init__: get_settings_defaults")
          return {
              servo_initial_value = -1,
              servo_min_pulse_width = 0.001128,
@@ -47,7 +41,7 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
              maximum_speed = 10000
          }
 
-
+     # #-- StartupPlugin mix-in
      def on_after_startup(self):
          self._logger.debug("__init__: on_after_startup")
 
@@ -99,11 +93,21 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
 
             if !self.M5Active:
                 self._logger.debug("setting servo to [{}]".format(servoValue))
-                servo.value = servoValue
+                self.servo.value = servoValue
+
+    # #-- EventHandlerPlugin mix-in
+    def on_event(self, event, payload):
+        self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
+
+        if event == Events.SHUTDOWN:
+            self._logger.debug("shutting down")
+            self.servo.value = self.servo_initial_value
+
 
     ##~~ AssetPlugin mixin
-
     def get_assets(self):
+        self._logger.debug("__init__: get_assets")
+
         # Define your plugin's asset files to automatically include in the
         # core UI here.
         return {
@@ -113,8 +117,9 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
         }
 
     ##~~ Softwareupdate hook
-
     def get_update_information(self):
+        self._logger.debug("__init__: get_update_information")
+
         # Define the configuration for your plugin to use with the Software Update
         # Plugin here. See https://docs.octoprint.org/en/master/bundledplugins/softwareupdate.html
         # for details.
@@ -133,7 +138,6 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
                 "pip": "https://github.com/synman/OctoPrint-Servospindle/archive/{target_version}.zip",
             }
         }
-
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
