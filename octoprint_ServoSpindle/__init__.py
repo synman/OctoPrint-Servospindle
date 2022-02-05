@@ -82,13 +82,13 @@ class ServospindlePlugin(
 
     ##-- gcode sending hook
     def hook_gcode_sending(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
-        self._logger.debug("__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(phase, cmd, cmd_type, gcode))
+        # self._logger.debug("__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(phase, cmd, cmd_type, gcode))
         self.process_gcode_data(cmd)
 
 
     ##-- gcode received hook
     def hook_gcode_received(self, comm_instance, line, *args, **kwargs):
-        self._logger.debug("__init__: hook_gcode_received line=[{}]".format(line.replace("\r", "<cr>").replace("\n", "<lf>")))
+        # self._logger.debug("__init__: hook_gcode_received line=[{}]".format(line.replace("\r", "<cr>").replace("\n", "<lf>")))
         self.process_gcode_data(line)
         return line
 
@@ -104,7 +104,7 @@ class ServospindlePlugin(
         if "M3" in data and self.M5Active:
             self._logger.debug("unlocking servo (M3)")
             if not self.servo.value == self.servoValue:
-                self._logger.debug("setting servo to [{}]".format(servoValue))
+                self._logger.debug("setting servo to [{}]".format(self.servoValue))
                 self.servo.value = self.servoValue
             self.M5Active = False
 
