@@ -18,7 +18,7 @@ plugin_version = "0.1.0"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
-plugin_description = """TODO"""
+plugin_description = """Servo Spindle enables servo based control of a CNC spindle by connecting to an ESC and trapping Grbl M3/M5/S commands"""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
 plugin_author = "Shell M. Shrader"
@@ -33,7 +33,7 @@ plugin_url = "https://github.com/synman/OctoPrint-Servospindle"
 plugin_license = "Apache2"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = []
+plugin_requires = [pigpio]
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point

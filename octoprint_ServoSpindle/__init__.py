@@ -10,18 +10,96 @@ from __future__ import absolute_import
 # Take a look at the documentation on what other plugin mixins are available.
 
 import octoprint.plugin
+import re
+
+from gpiozero.pins.pigpio import PiGPIOFactory
+from gpiozero import Servo
 
 class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
-    octoprint.plugin.AssetPlugin,
-    octoprint.plugin.TemplatePlugin
-):
+                         octoprint.plugin.AssetPlugin,
+                         octoprint.plugin.StartupPlugin,
+                         octoprint.plugin.TemplatePlugin):
 
-    ##~~ SettingsPlugin mixin
+     def __init__(self):
+         self.servo_initial_value = None
+         self.servo_min_pulse_width = None
+         self.servo_gpio_pin = None
+         self.pigpio_host = None
+         self.pigpio_port = None
+         self.minimum_speed = None
+         self.maximum_speed = None
 
-    def get_settings_defaults(self):
-        return {
-            # put your plugin's default settings here
-        }
+         self.M5Active = False
+         self.servoValue = None
+
+         self.servo = None
+
+     ##~~ SettingsPlugin mixin
+
+     def get_settings_defaults(self):
+         return {
+             servo_initial_value = -1,
+             servo_min_pulse_width = 0.001128,
+             servo_gpio_pin = 26,
+             pigpio_host = "octopi-zero2",
+             pigpio_port = 32000,
+             minimum_speed = 0,
+             maximum_speed = 10000
+         }
+
+
+     def on_after_startup(self):
+         self._logger.debug("__init__: on_after_startup")
+
+         self.servo_initial_value = self._settings.get(["servo_initial_value"])
+         self.servo_min_pulse_width = self._settings.get(["servo_min_pulse_width"])
+         self.servo_gpio_pin = self._settings.get(["servo_gpio_pin"])
+
+         self.pigpio_host = self._settings.get(["pigpio_host"])
+         self.pigpio_port = self._settings.get(["pigpio_port"])
+
+         self.minimum_speed = self._settings.get(["minimum_speed"])
+         self.maximum_speed = self._settings.get(["maximum_speed"])
+
+         self.servoValue = self.servo_initial_value
+
+         factory = PiGPIOFactory(host=self.pigpio_host, port=self.pigpio_port)
+         self.servo = Servo(self.servo_gpio_pin,
+                            pin_factory=factory,
+                            initial_value=self.servo_initial_value,
+                            min_pulse_width=self.min_pulse_width)
+
+
+    # #-- gcode sending hook
+    def hook_gcode_sending(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
+        self._logger.debug("__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(phase, cmd, cmd_type, gcode))
+        command = cmd.upper().strip()
+
+        if "M5" in command:
+            self._logger.debug("setting servo to minimum (M5)")
+            self.M5Active = True
+            self.servo.min()
+
+        if "M3" in command:
+            self._logger.debug("unlocking servo (M3)")
+            self.servo.value = self.servoValue
+            self.M5Active = False
+
+        match = re.search(r".*[S]\ *(-?[\d.]+).*", command)
+        if not match is None:
+            speed = float(match.groups(1)[0])
+            speedRange = self.maximum_speed - self._minimum_speed
+            speedPercent = (speed - self.minumum_speed) / speedRange
+
+            servoValue = 2 * speedPercent - 1
+            servoValue = -1 if servoValue < -1 else servoValue
+            servoValue = 1 if servoValue > 1 else servoValue
+
+            self.servoValue = servoValue
+
+            if !self.M5Active:
+                self._logger.debug("setting servo to [{}]".format(servoValue))
+                servo.value = servoValue
 
     ##~~ AssetPlugin mixin
 
@@ -75,5 +153,6 @@ def __plugin_load__():
 
     global __plugin_hooks__
     __plugin_hooks__ = {
+        "octoprint.comm.protocol.gcode.sending": __plugin_implementation__.hook_gcode_sending,
         "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
     }
