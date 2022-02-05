@@ -33,7 +33,7 @@ plugin_url = "https://github.com/synman/OctoPrint-Servospindle"
 plugin_license = "Apache2"
 
 # Any additional requirements besides OctoPrint should be listed here
-plugin_requires = ["pigpio"]
+plugin_requires = ["gpiozero", "pigpio"]
 
 ### --------------------------------------------------------------------------------------------------------------------
 ### More advanced options that you usually shouldn't have to touch follow after this point
