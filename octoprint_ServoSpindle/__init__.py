@@ -84,12 +84,13 @@ class ServospindlePlugin(
     def hook_gcode_sending(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
         self._logger.debug("__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(phase, cmd, cmd_type, gcode))
         self.process_gcode_data(cmd)
-        
+
 
     ##-- gcode received hook
     def hook_gcode_received(self, comm_instance, line, *args, **kwargs):
         self._logger.debug("__init__: hook_gcode_received line=[{}]".format(line.replace("\r", "<cr>").replace("\n", "<lf>")))
         self.process_gcode_data(line)
+        return None
 
 
     def process_gcode_data(self, gcode):
