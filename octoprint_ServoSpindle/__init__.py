@@ -93,7 +93,7 @@ class ServospindlePlugin(
         if not match is None:
             speed = float(match.groups(1)[0])
             speedRange = self.maximum_speed - self.minimum_speed
-            speedPercent = (speed - self.minumum_speed) / speedRange
+            speedPercent = (speed - self.minimum_speed) / speedRange
 
             servoValue = 2 * speedPercent - 1
             servoValue = -1 if servoValue < -1 else servoValue
