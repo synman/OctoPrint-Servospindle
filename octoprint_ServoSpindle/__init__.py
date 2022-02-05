@@ -92,7 +92,7 @@ class ServospindlePlugin(
         match = re.search(r".*[S]\ *(-?[\d.]+).*", command)
         if not match is None:
             speed = float(match.groups(1)[0])
-            speedRange = self.maximum_speed - self._minimum_speed
+            speedRange = self.maximum_speed - self.minimum_speed
             speedPercent = (speed - self.minumum_speed) / speedRange
 
             servoValue = 2 * speedPercent - 1
