@@ -65,7 +65,7 @@ class ServospindlePlugin(
             self.servo_gpio_pin,
             pin_factory=factory,
             initial_value=self.servo_initial_value,
-            min_pulse_width=self.min_pulse_width,
+            min_pulse_width=self.servo_min_pulse_width,
         )
 
     ##-- gcode sending hook
