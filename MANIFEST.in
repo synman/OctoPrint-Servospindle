@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_ServoSpindle/templates *
+recursive-include octoprint_ServoSpindle/translations *
+recursive-include octoprint_ServoSpindle/static *
