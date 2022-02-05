@@ -7,67 +7,75 @@ import re
 from gpiozero.pins.pigpio import PiGPIOFactory
 from gpiozero import Servo
 
-class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
-                         octoprint.plugin.AssetPlugin,
-                         octoprint.plugin.StartupPlugin,
-                         octoprint.plugin.EventHandlerPlugin,
-                         octoprint.plugin.TemplatePlugin):
 
-     def __init__(self):
-         self.servo_initial_value = None
-         self.servo_min_pulse_width = None
-         self.servo_gpio_pin = None
-         self.pigpio_host = None
-         self.pigpio_port = None
-         self.minimum_speed = None
-         self.maximum_speed = None
+class ServospindlePlugin(
+                            octoprint.plugin.SettingsPlugin,
+                            octoprint.plugin.AssetPlugin,
+                            octoprint.plugin.StartupPlugin,
+                            octoprint.plugin.EventHandlerPlugin,
+                            octoprint.plugin.TemplatePlugin,
+                        ):
 
-         self.M5Active = False
-         self.servoValue = None
+    def __init__(self):
+        self.servo_initial_value = None
+        self.servo_min_pulse_width = None
+        self.servo_gpio_pin = None
+        self.pigpio_host = None
+        self.pigpio_port = None
+        self.minimum_speed = None
+        self.maximum_speed = None
 
-         self.servo = None
+        self.M5Active = False
+        self.servoValue = None
 
+        self.servo = None
 
-     ##~~ SettingsPlugin mixin
-     def get_settings_defaults(self):
-         self._logger.debug("__init__: get_settings_defaults")
-         return dict(
-             servo_initial_value = -1,
-             servo_min_pulse_width = 0.001128,
-             servo_gpio_pin = 26,
-             pigpio_host = "octopi-zero2",
-             pigpio_port = 32000,
-             minimum_speed = 0,
-             maximum_speed = 10000
-         )
+    ##~~ SettingsPlugin mixin
+    def get_settings_defaults(self):
+        self._logger.debug("__init__: get_settings_defaults")
+        return dict(
+            servo_initial_value=-1,
+            servo_min_pulse_width=0.001128,
+            servo_gpio_pin=26,
+            pigpio_host="octopi-zero2",
+            pigpio_port=32000,
+            minimum_speed=0,
+            maximum_speed=10000,
+        )
 
+    ##-- StartupPlugin mix-in
+    def on_after_startup(self):
+        self._logger.debug("__init__: on_after_startup")
 
-     # #-- StartupPlugin mix-in
-     def on_after_startup(self):
-         self._logger.debug("__init__: on_after_startup")
+        self.servo_initial_value = self._settings.get(["servo_initial_value"])
+        self.servo_min_pulse_width = self._settings.get(["servo_min_pulse_width"])
+        self.servo_gpio_pin = self._settings.get(["servo_gpio_pin"])
 
-         self.servo_initial_value = self._settings.get(["servo_initial_value"])
-         self.servo_min_pulse_width = self._settings.get(["servo_min_pulse_width"])
-         self.servo_gpio_pin = self._settings.get(["servo_gpio_pin"])
+        self.pigpio_host = self._settings.get(["pigpio_host"])
+        self.pigpio_port = self._settings.get(["pigpio_port"])
 
-         self.pigpio_host = self._settings.get(["pigpio_host"])
-         self.pigpio_port = self._settings.get(["pigpio_port"])
+        self.minimum_speed = self._settings.get(["minimum_speed"])
+        self.maximum_speed = self._settings.get(["maximum_speed"])
 
-         self.minimum_speed = self._settings.get(["minimum_speed"])
-         self.maximum_speed = self._settings.get(["maximum_speed"])
+        self.servoValue = self.servo_initial_value
 
-         self.servoValue = self.servo_initial_value
+        factory = PiGPIOFactory(host=self.pigpio_host, port=self.pigpio_port)
+        self.servo = Servo(
+            self.servo_gpio_pin,
+            pin_factory=factory,
+            initial_value=self.servo_initial_value,
+            min_pulse_width=self.min_pulse_width,
+        )
 
-         factory = PiGPIOFactory(host=self.pigpio_host, port=self.pigpio_port)
-         self.servo = Servo(self.servo_gpio_pin,
-                            pin_factory=factory,
-                            initial_value=self.servo_initial_value,
-                            min_pulse_width=self.min_pulse_width)
-
-
-    # #-- gcode sending hook
-    def hook_gcode_sending(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
-        self._logger.debug("__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(phase, cmd, cmd_type, gcode))
+    ##-- gcode sending hook
+    def hook_gcode_sending(
+        self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs
+    ):
+        self._logger.debug(
+            "__init__: hook_gcode_sending phase=[{}] cmd=[{}] cmd_type=[{}] gcode=[{}]".format(
+                phase, cmd, cmd_type, gcode
+            )
+        )
         command = cmd.upper().strip()
 
         if "M5" in command:
@@ -96,15 +104,15 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
                 self._logger.debug("setting servo to [{}]".format(servoValue))
                 self.servo.value = self.servoValue
 
-
-    # #-- EventHandlerPlugin mix-in
+    ##-- EventHandlerPlugin mix-in
     def on_event(self, event, payload):
-        self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
+        self._logger.debug(
+            "__init__: on_event event=[{}] payload=[{}]".format(event, payload)
+        )
 
         if event == Events.SHUTDOWN:
             self._logger.debug("shutting down")
             self.servo.value = self.servo_initial_value
-
 
     ##~~ AssetPlugin mixin
     def get_assets(self):
@@ -115,9 +123,8 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
         return {
             "js": ["js/ServoSpindle.js"],
             "css": ["css/ServoSpindle.css"],
-            "less": ["less/ServoSpindle.less"]
+            "less": ["less/ServoSpindle.less"],
         }
-
 
     ##~~ Softwareupdate hook
     def get_update_information(self):
@@ -130,17 +137,16 @@ class ServospindlePlugin(octoprint.plugin.SettingsPlugin,
             "ServoSpindle": {
                 "displayName": "Servospindle Plugin",
                 "displayVersion": self._plugin_version,
-
                 # version check: github repository
                 "type": "github_release",
                 "user": "synman",
                 "repo": "OctoPrint-Servospindle",
                 "current": self._plugin_version,
-
                 # update method: pip
                 "pip": "https://github.com/synman/OctoPrint-Servospindle/archive/{target_version}.zip",
             }
         }
+
 
 # If you want your plugin to be registered within OctoPrint under a different name than what you defined in setup.py
 # ("OctoPrint-PluginSkeleton"), you may define that here. Same goes for the other metadata derived from setup.py that
@@ -150,9 +156,10 @@ __plugin_name__ = "Servospindle Plugin"
 # Starting with OctoPrint 1.4.0 OctoPrint will also support to run under Python 3 in addition to the deprecated
 # Python 2. New plugins should make sure to run under both versions for now. Uncomment one of the following
 # compatibility flags according to what Python versions your plugin supports!
-#__plugin_pythoncompat__ = ">=2.7,<3" # only python 2
-#__plugin_pythoncompat__ = ">=3,<4" # only python 3
-#__plugin_pythoncompat__ = ">=2.7,<4" # python 2 and 3
+# __plugin_pythoncompat__ = ">=2.7,<3" # only python 2
+# __plugin_pythoncompat__ = ">=3,<4" # only python 3
+# __plugin_pythoncompat__ = ">=2.7,<4" # python 2 and 3
+
 
 def __plugin_load__():
     global __plugin_implementation__
@@ -161,5 +168,5 @@ def __plugin_load__():
     global __plugin_hooks__
     __plugin_hooks__ = {
         "octoprint.comm.protocol.gcode.sending": __plugin_implementation__.hook_gcode_sending,
-        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information
+        "octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
     }
