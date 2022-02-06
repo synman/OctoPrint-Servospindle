@@ -125,12 +125,13 @@ class ServospindlePlugin(
 
         if "M3" in data and self.M5Active:
             self._logger.debug("unlocking servo (M3)")
-            if not self.servo.value == self.servoValue:
-                self._logger.debug("setting servo to [{}]".format(self.servoValue))
-
-                if self.gpio_library == "pigpio":
+            if self.gpio_library == "pigpio":
+                if not self.servo.value == self.servoValue:
+                    self._logger.debug("setting servo to [{}]".format(self.servoValue))
                     self.servo.value = self.servoValue
-                else:
+            else:
+                if not self.servo._duty_cycle == self.servoValue:
+                    self._logger.debug("setting servo to [{}]".format(self.servoValue))
                     self.servo.change_duty_cycle(self.servoValue)
 
             self.M5Active = False
