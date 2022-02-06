@@ -128,7 +128,7 @@ class ServospindlePlugin(
     ##-- EventHandlerPlugin mix-in
     def on_event(self, event, payload):
 
-        if event in (Events.SHUTDOWN, Events.CONNECTING, Events.DISCONNECTED)
+        if event in (Events.SHUTDOWN, Events.CONNECTING, Events.DISCONNECTED):
             self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
             if not servo is None:
                 self.servo.value = self.servo_initial_value
