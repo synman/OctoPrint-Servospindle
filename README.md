@@ -19,16 +19,16 @@ The dependent **gpiozero** and **pigpio** libraries as installed automatically w
 
 There is no Plugin Settings UI at this time but this plugin is fully configurable via Octoprint's config.yaml file.
 
-** Default Settings **
+### Default Settings 
 
-plugins:
-  ServoSpindle:
-    servo_initial_value: -1
-    servo_min_pulse_width: 0.001
-    servo_max_pulse_width: 0.002
-    servo_frame_width: .02
-    servo_gpio_pin: 26
-    pigpio_host: 127.0.0.1
-    pigpio_port: 8888
-    minimum_speed: 0
-    maximum_speed: 10000
+    plugins:
+      ServoSpindle:
+        servo_initial_value: -1
+        servo_min_pulse_width: 0.001
+        servo_max_pulse_width: 0.002
+        servo_frame_width: .02
+        servo_gpio_pin: 26
+        pigpio_host: 127.0.0.1
+        pigpio_port: 8888
+        minimum_speed: 0
+        maximum_speed: 10000
