@@ -94,6 +94,8 @@ class ServospindlePlugin(
     def process_gcode_data(self, gcode):
         data = gcode.upper().strip()
 
+        if self.servo is None: return
+
         if "M5" in data and not self.M5Active:
             self._logger.debug("setting servo to minimum (M5)")
             self.M5Active = True
