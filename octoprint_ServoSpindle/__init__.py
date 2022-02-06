@@ -121,7 +121,7 @@ class ServospindlePlugin(
             if self.gpio_library == "pigpio":
                 self.servo.min()
             else:
-                self.servo.change_duty_cycle(self.servo_min_pulse_width)
+                self.servo.change_duty_cycle(self.servo_min_duty_cycle)
 
         if "M3" in data and self.M5Active:
             self._logger.debug("unlocking servo (M3)")
