@@ -13,7 +13,7 @@ or manually using this URL:
 You'll need **pigpiod** installed somewhere accessible to your Octoprint server.  It can be running on
 the same machine as Octoprint or it can be installed on a remote computer.
 
-The dependent **gpiozero** and **pigpio** libraries as installed automatically with Servo Spindle.
+The dependent **gpiozero** and **pigpio** python libraries are installed automatically with Servo Spindle.
 
 ## Configuration
 
