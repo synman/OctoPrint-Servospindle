@@ -39,12 +39,12 @@ class ServospindlePlugin(
         self._logger.debug("__init__: get_settings_defaults")
         return dict(
             servo_initial_value = -1,
-            servo_min_pulse_width = 0.001128,
+            servo_min_pulse_width = 0.001,
             servo_max_pulse_width = 0.002,
             servo_frame_width = .02,
             servo_gpio_pin = 26,
-            pigpio_host = "octopi-zero2",
-            pigpio_port = 32000,
+            pigpio_host = "127.0.0.1",
+            pigpio_port = 8888,
             minimum_speed = 0,
             maximum_speed = 10000,
         )
