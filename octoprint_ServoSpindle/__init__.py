@@ -141,7 +141,7 @@ class ServospindlePlugin(
             speedRange = self.maximum_speed - self.minimum_speed
             speedPercent = (speed - self.minimum_speed) / speedRange
 
-            if gpio_library = "pigpio":
+            if self.gpio_library == "pigpio":
                 servoValue = 2 * speedPercent - 1
                 servoValue = -1 if servoValue < -1 else servoValue
                 servoValue = 1 if servoValue > 1 else servoValue
