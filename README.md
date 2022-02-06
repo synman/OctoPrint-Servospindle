@@ -1,7 +1,7 @@
 # OctoPrint-Servospindle
 
 Servo Spindle enables you to control a "servo" (typically an Electronic Speed Controller) triggered off of GRBL
-gcode commands sent to and the status reported by your CNC machine.
+gcode commands sent to your CNC machine and the status the machine reports for spindle mode and spindle speed.
 
 ## Setup
 
