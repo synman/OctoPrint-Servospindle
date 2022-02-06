@@ -11,7 +11,7 @@ or manually using this URL:
     https://github.com/synman/OctoPrint-Servospindle/archive/master.zip
 
 You'll need **pigpiod** installed somewhere accessible to your Octoprint server.  It can be running on
-the same machine as Octoprint or it can installed on a remote computer.
+the same machine as Octoprint or it can be installed on a remote computer.
 
 The dependent **gpiozero** and **pigpio** libraries as installed automatically with Servo Spindle.
 
