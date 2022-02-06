@@ -12,7 +12,6 @@ from gpiozero import Servo
 class ServospindlePlugin(
                             octoprint.plugin.SettingsPlugin,
                             octoprint.plugin.AssetPlugin,
-                            octoprint.plugin.StartupPlugin,
                             octoprint.plugin.EventHandlerPlugin,
                             octoprint.plugin.TemplatePlugin,
                         ):
@@ -50,9 +49,8 @@ class ServospindlePlugin(
             maximum_speed = 10000,
         )
 
-    ##-- StartupPlugin mix-in
-    def on_startup(self, host, port):
-        self._logger.debug("__init__: on_startup host=[{}] port=[{}]".format(host, port))
+    def initialize_servo(self):
+        self._logger.debug("__init__: initialize_servo")
 
         self.servo_initial_value = self._settings.get(["servo_initial_value"])
         self.servo_min_pulse_width = self._settings.get(["servo_min_pulse_width"])
@@ -130,14 +128,15 @@ class ServospindlePlugin(
     ##-- EventHandlerPlugin mix-in
     def on_event(self, event, payload):
 
-        if event in (Events.SHUTDOWN, Events.CONNECTING, Events.DISCONNECTED):
+        if event in (Events.SHUTDOWN, Events.CONNECTING, Events.DISCONNECTED)
             self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
-            self.servo.value = self.servo_initial_value
-            self.servo.value = None
-            self.servo = None 
+            if not servo is None:
+                self.servo.value = self.servo_initial_value
+                self.servo.value = None
+                self.servo = None
 
         if event == Events.CONNECTING:
-            self.on_startup("N/A", 0)
+            self.initialize_servo()
 
 
     ##~~ AssetPlugin mixin
