@@ -16,7 +16,7 @@ Follow the (simple) procedure documented for **rpi-hardware-pwm** to properly co
 
 Initial tests were reasonable with **gpiozero** and **pigpio** but I noticed a rare "jitter" that just isn't something I can tolerate when running a CNC spindle at 15,000+ RPM.  If you do decide to go the software PWM timing route, it is fully supported, but buyers beware.  You'll need **pigpiod** installed somewhere accessible to your Octoprint server.  It can be running on the same machine as Octoprint or it can be installed on a remote computer (which is pretty nifty).
 
-All dependent client **gpiozero**, **pigpio**, **rpi-hardware-pwm** python libraries are installed automatically with Servo Spindle.  
+All dependent client **gpiozero**, **pigpio**, and **rpi-hardware-pwm** python libraries are installed automatically with Servo Spindle.  
 
 ## Configuration
 
