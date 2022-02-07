@@ -4,10 +4,13 @@ from octoprint.events import Events
 
 import octoprint.plugin
 import re
+import time
 
 from rpi_hardware_pwm import HardwarePWM
 from gpiozero.pins.pigpio import PiGPIOFactory
 from gpiozero import Servo
+
+from timeit import default_timer as timer
 
 
 class ServospindlePlugin(
@@ -141,7 +144,10 @@ class ServospindlePlugin(
                     self._logger.debug("setting servo to [{}]".format(self.servoValue))
                     self.servo.change_duty_cycle(self.servoValue)
 
+        start = timer()
         match = re.search(r".*[S]\ *(-?[\d.]+).*", data)
+        self._logger.debug("match string=[{}] result=[{}] time=[{}]".format(data, not match is None, timer() - start))
+
 
         if not match is None:
             speed = float(match.groups(1)[0])
@@ -175,7 +181,7 @@ class ServospindlePlugin(
     def on_event(self, event, payload):
         if event in (Events.SHUTDOWN, Events.CONNECTING, Events.DISCONNECTED):
             self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
-            
+
             if not self.servo is None:
                 if self.gpio_library == "pigpio":
                     self.servo.value = self.servo_initial_value
