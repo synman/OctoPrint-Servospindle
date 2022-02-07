@@ -30,6 +30,8 @@ class ServospindlePlugin(
         self.minimum_speed = None
         self.maximum_speed = None
 
+        self.pwm_channel = None
+
         self.servo_min_duty_cycle = None
         self.servo_max_duty_cycle = None
 
@@ -53,6 +55,7 @@ class ServospindlePlugin(
             pigpio_port = 8888,
             minimum_speed = 0,
             maximum_speed = 10000,
+            pwm_channel = 0,
             servo_min_duty_cycle = 5,
             servo_max_duty_cycle = 10,
             gpio_library = "rpi_hardware_pwm"
@@ -78,22 +81,23 @@ class ServospindlePlugin(
         # spindle (grbl) min / max speed
         self.minimum_speed = self._settings.get(["minimum_speed"])
         self.maximum_speed = self._settings.get(["maximum_speed"])
+        self.pwm_channel = self._settings.get(["pwm_channel"])
 
         self.gpio_library = self._settings.get(["gpio_library"])
 
         if self.gpio_library == "pigpio":
-            self.servoValue = self.servo_initial_value
             factory = PiGPIOFactory(host=self.pigpio_host, port=self.pigpio_port)
+            self.servoValue = self.servo_initial_value
             self.servo = Servo(self.servo_gpio_pin,
                                pin_factory=factory,
-                               initial_value=self.servo_initial_value,
+                               initial_value=self.servoValue,
                                min_pulse_width=self.servo_min_pulse_width,
                                max_pulse_width=self.servo_max_pulse_width,
                                frame_width=self.servo_frame_width)
         else:
+            self.servo = HardwarePWM(pwm_channel=self.pwm_channel, hz=50)
             self.servoValue = self.servo_min_duty_cycle
-            self.servo = HardwarePWM(pwm_channel=0, hz=50)
-            self.servo.start(self.servo_min_duty_cycle)
+            self.servo.start(self.servoValue)
 
 
     ##-- gcode sending hook
@@ -110,21 +114,24 @@ class ServospindlePlugin(
 
 
     def process_gcode_data(self, gcode):
-        data = gcode.upper().strip()
-
         if self.servo is None: return
+
+        data = gcode.upper().strip()
 
         if "M5" in data and not self.M5Active:
             self._logger.debug("setting servo to minimum (M5)")
-            self.M5Active = True
 
             if self.gpio_library == "pigpio":
                 self.servo.min()
             else:
                 self.servo.change_duty_cycle(self.servo_min_duty_cycle)
 
+            self.M5Active = True
+
         if "M3" in data and self.M5Active:
             self._logger.debug("unlocking servo (M3)")
+            self.M5Active = False
+
             if self.gpio_library == "pigpio":
                 if not self.servo.value == self.servoValue:
                     self._logger.debug("setting servo to [{}]".format(self.servoValue))
@@ -134,9 +141,8 @@ class ServospindlePlugin(
                     self._logger.debug("setting servo to [{}]".format(self.servoValue))
                     self.servo.change_duty_cycle(self.servoValue)
 
-            self.M5Active = False
-
         match = re.search(r".*[S]\ *(-?[\d.]+).*", data)
+
         if not match is None:
             speed = float(match.groups(1)[0])
             speedRange = self.maximum_speed - self.minimum_speed
@@ -169,10 +175,14 @@ class ServospindlePlugin(
     def on_event(self, event, payload):
         if event in (Events.SHUTDOWN, Events.CONNECTING, Events.DISCONNECTED):
             self._logger.debug("__init__: on_event event=[{}] payload=[{}]".format(event, payload))
+            
             if not self.servo is None:
-                # self.servo.value = self.servo_initial_value
-                # self.servo.value = None
-                self.servo.stop()
+                if self.gpio_library == "pigpio":
+                    self.servo.value = self.servo_initial_value
+                    self.servo.value = None
+                else:
+                    self.servo.stop()
+
                 self.servo = None
 
         if event == Events.CONNECTING:

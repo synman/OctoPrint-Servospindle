@@ -27,6 +27,7 @@ There is no Plugin Settings UI at this time but this plugin is fully configurabl
     plugins:
       ServoSpindle:
         gpio_library: rpi_hardware_pwm
+        pwm_channel: 0
         servo_min_duty_cycle: 5
         servo_max_duty_cycle: 10
         servo_initial_value: -1
@@ -42,7 +43,8 @@ There is no Plugin Settings UI at this time but this plugin is fully configurabl
 gpio_library can be set to **rpi_hardware_pwm** or **pigpio**.
 
 The following settings apply to **rpi_hardware_pwm**:
-    
+
+    pwm_channel: 0
     servo_min_duty_cycle: 5
     servo_max_duty_cycle: 10
 
