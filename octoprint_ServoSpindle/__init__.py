@@ -144,10 +144,7 @@ class ServospindlePlugin(
                     self._logger.debug("setting servo to [{}]".format(self.servoValue))
                     self.servo.change_duty_cycle(self.servoValue)
 
-        start = timer()
         match = re.search(r".*[S]\ *(-?[\d.]+).*", data)
-        self._logger.debug("match string=[{}] result=[{}] time=[{}]".format(data, not match is None, timer() - start))
-
 
         if not match is None:
             speed = float(match.groups(1)[0])
