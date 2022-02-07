@@ -53,7 +53,7 @@ class ServospindlePlugin(
             pigpio_port = 8888,
             minimum_speed = 0,
             maximum_speed = 10000,
-            servo_min_duty_cycle = 5.6,
+            servo_min_duty_cycle = 5,
             servo_max_duty_cycle = 10,
             gpio_library = "rpi_hardware_pwm"
         )
