@@ -1,5 +1,7 @@
 # OctoPrint-Servospindle
 
+![grbl](https://raw.githubusercontent.com/gnea/gnea-Media/master/Grbl%20Logo/Grbl%20Logo%20250px.png)
+
 Servo Spindle enables you to control a "servo" (typically an Electronic Speed Controller) triggered off of GRBL
 gcode commands sent to your CNC machine and the status the machine reports for spindle mode and spindle speed.
 
