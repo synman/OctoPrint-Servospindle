@@ -42,12 +42,14 @@ There is no Plugin Settings UI at this time but this plugin is fully configurabl
 gpio_library can be set to **rpi_hardware_pwm** or **pigpio**.
 
 The following settings apply to **rpi_hardware_pwm**:
+    
     servo_min_duty_cycle: 5
     servo_max_duty_cycle: 10
 
     * servo_min_duty_cycle is used as the servo_initial_value with this implementation
 
 The following settings apply to **pigpio**:
+
     servo_initial_value: -1
     servo_min_pulse_width: 0.001
     servo_max_pulse_width: 0.002
@@ -57,8 +59,9 @@ The following settings apply to **pigpio**:
     pigpio_port: 8888
 
 The following settings are global:
+
     gpio_library: rpi_hardware_pwm or pigpio
     minimum_speed: 0
     maximum_speed: 10000
 
-    **minimum_speed** and **maximum_speed** can be arbitrary but are intended to represent your GRBL spindle speed value range.  To be consistent with your GRBL controller, you should set these to the same values you have for min/max spindle speed in GRBL's $31 and $30 settings, but this is not absolutely necessary.  Whatever S### value provided is re-scaled from the minimum/maximum speed range to the **servo_min_duty_cycle** and **servo_max_duty_cycle** range when using **rpi_hardware_pwm** or the **servo_min_pulse_width** and **servo_max_pulse_width** range if using **pigpio**.
+**minimum_speed** and **maximum_speed** can be arbitrary but are intended to represent your GRBL spindle speed value range.  To be consistent with your GRBL controller, you should set these to the same values you have for min/max spindle speed in GRBL's $31 and $30 settings, but this is not absolutely necessary.  Whatever S### value provided is re-scaled from the minimum/maximum speed range to the **servo_min_duty_cycle** and **servo_max_duty_cycle** range when using **rpi_hardware_pwm** or the **servo_min_pulse_width** and **servo_max_pulse_width** range if using **pigpio**.
