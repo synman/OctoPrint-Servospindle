@@ -10,7 +10,7 @@ or manually using this URL:
 
     https://github.com/synman/OctoPrint-Servospindle/archive/master.zip
 
-The ideal setup for this plugin is using hardware based PWM timing on GPIO 18, 19, 12, or 13.  This facilitated by use of the **rpi-hardware-pwm** library that provides a simple implementation for interacting directly with your CPU's timing clock.  This enables precise hardware based pulse width modulation which is critical when controlling an electronic speed control.  
+The ideal setup for this plugin is using hardware based PWM timing on GPIO 18, 19, 12, or 13.  This is accomplished by use of the **rpi-hardware-pwm** library that provides a simple implementation for interacting directly with your CPU's timing clock.  This enables precise hardware based pulse width modulation which is critical when controlling an electronic speed control.  
 
 Follow the (simple) procedure documented for **rpi-hardware-pwm** to properly configure it here:  https://github.com/Pioreactor/rpi_hardware_pwm#installation
 
