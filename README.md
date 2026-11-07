@@ -1,9 +1,18 @@
-# OctoPrint-Servospindle
+[![Usage Statistics](https://github.com/synman/OctoPluginStats/actions/workflows/get-data.yaml/badge.svg)](https://synman.github.io/OctoPluginStats/#ServoSpindleContainer)
+# Servo Spindle Plugin for Octoprint
 
 ![grbl](https://raw.githubusercontent.com/gnea/gnea-Media/master/Grbl%20Logo/Grbl%20Logo%20250px.png)
 
 Servo Spindle enables you to control a "servo" (typically an Electronic Speed Controller) triggered off of GRBL
 gcode commands sent to your CNC machine and the status the machine reports for spindle mode and spindle speed.
+
+Here are some of Servo Spindle's capabilities:
+
+* Sets spindle speed from the GRBL spindle mode and speed your CNC machine reports
+* Drives an Electronic Speed Controller or other servo from a Raspberry Pi GPIO pin
+* Works with either the **rpi_hardware_pwm** or **pigpio** library
+* Maps your own GRBL speed range with **minimum_speed** and **maximum_speed**
+* Installs the libraries it needs automatically
 
 ## Setup
 
